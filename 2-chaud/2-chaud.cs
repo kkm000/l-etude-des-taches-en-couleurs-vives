@@ -34,10 +34,18 @@ public static class Program {
   // Windows. Other platforms may have a different sweet spot.
   const uint BUFSIZE = 256 * 1024;
 
-  static IEnumerable<string> Filenames =>
-    Directory.EnumerateFiles(Environment.SystemDirectory, "*.dll");
+  static IEnumerable<string> Filenames;
 
   static void Main(string[] args) {
+    if (args.Length == 0) {
+      Filenames =
+        Directory.EnumerateFiles(Environment.SystemDirectory, "*.dll");
+    }
+    else if (args.Length == 1) {
+      Filenames = Directory.EnumerateFiles(args[0]);
+    } else {
+      Filenames = Directory.EnumerateFiles(args[0], args[1]);
+    }
     PrintRunStats();
 
   // It's ok to set the LowLatency mode while streaming, unless it's a hour-long
@@ -262,10 +270,11 @@ public static class Program {
 
     string bitness = Environment.Is64BitProcess ? "64-bit" : "32-bit";
 
-    WriteLine(
-      "Running on {0} at {1} os='{2} ({3})' fwk={4} ncpu={5} build={6} buf_kb={7}",
-      DateTime.Now.ToString("yyMMdd'-'HHmm"), Environment.MachineName, osname,
-      bitness, framework, Environment.ProcessorCount, build, BUFSIZE/1024);
+    WriteLine("Running at {0} on {1} os='{2} ({3})'",
+              DateTime.Now.ToString("yyMMdd'-'HHmm"), Environment.MachineName,
+              osname, bitness);
+    WriteLine("     fwk={0} ncpu={1} build={2} buf_kb={3}",
+              framework, Environment.ProcessorCount, build, BUFSIZE / 1024);
 
     // These are parameters of the ThreadPool, which may or may not be the same
     // as the task scheduler's thread pool. Assume they are.
